@@ -31,6 +31,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        
       - name: Detect package manager
         id: detect-package-manager
         run: |
@@ -53,36 +54,34 @@ jobs:
             echo "Unable to determine package manager"
             exit 1
           fi
-      - name: Setup Node
+          
+      - name: Install pnpm CLI # <-- RUN THIS FIRST TO ENSURE PNPM IS ON PATH
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8 
+          run_install: false 
+
+      - name: Setup Node (for environment and caching)
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
           
-      - name: Install pnpm CLI # <-- Replaced manual install with dedicated action
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8 # Use a stable version
-          run_install: false # Only install the pnpm CLI, not project dependencies
-          
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
-          # Automatically inject basePath in your Next.js configuration file and disable
-          # server side image optimization (https://nextjs.org/docs/api-reference/next/image#unoptimized).
-          #
-          # You may remove this line if you want to manage the configuration yourself.
           static_site_generator: next
+          
+      # The rest of the workflow remains the same, including the explicit cache step below
       - name: Restore cache
         uses: actions/cache@v4
         with:
           path: |
             .next/cache
-          # Generate a new cache whenever packages or source files change.
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock', '**/pnpm-lock.yaml') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
-          # If source files changed but packages didn't, rebuild from a prior cache.
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock', '**/pnpm-lock.yaml') }}-
+            
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Next.js

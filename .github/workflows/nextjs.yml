@@ -58,8 +58,7 @@ jobs:
         with:
           node-version: "20"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
-      - name: Install pnpm globally # <-- New step to install pnpm
-        run: npm install -g pnpm
+          package-manager: true # <-- CRITICAL ADDITION: Installs the detected package manager (pnpm)
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:

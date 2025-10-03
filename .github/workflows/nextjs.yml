@@ -58,10 +58,13 @@ jobs:
         with:
           node-version: "20"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
-      - name: Install pnpm globally and set PATH # <-- The ultimate fix to ensure pnpm is on $PATH
-        run: |
-          npm install -g pnpm
-          echo "$(npm config get prefix)/bin" >> $GITHUB_PATH
+          
+      - name: Install pnpm CLI # <-- Replaced manual install with dedicated action
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8 # Use a stable version
+          run_install: false # Only install the pnpm CLI, not project dependencies
+          
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
